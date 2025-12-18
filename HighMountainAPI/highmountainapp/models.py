@@ -8,4 +8,16 @@ class UserSession(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     token = models.CharField(unique=True, max_length=30)
 
+class Score(models.Model):
+    player = models.CharField(max_length=15)
+    points = models.IntegerField()
 
+class Foro(models.Model):
+    title = models.CharField(max_length=15)
+
+
+class Comment(models.Model):
+    message = models.TextField()
+    datetime = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    foro = models.ForeignKey(Foro, on_delete=models.CASCADE)
