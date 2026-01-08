@@ -28,3 +28,26 @@ def login_user(request):
         pass  # Contraseña incorrecta. En la siguiente tarea lo gestionamos
 
     return JsonResponse({'message': 'User logged in successfully'})
+
+def get_foroId(request, id_foro):
+    # Comprobar method
+    if request.method != 'GET':
+        return JsonResponse({'error': 'HTTP method unsupported'}, status=405)
+
+    # Leer token del header
+    token = request.headers.get('Authorization')
+    if not token:
+        return JsonResponse({'error': 'Token inválido'}, status=401)
+
+    # Comprobar si el token existe en BD
+    try:
+        UserSession.objects.get(token=token)
+    except UserSession.DoesNotExist:
+        return JsonResponse({'error': 'Token inválido'}, status=401)
+
+    # Foro no encontrado
+    if id_foro not in foros:
+        return JsonResponse({'error': 'Foro no encontrado'}, status=404)
+
+    # Respuesta OK
+    return JsonResponse(foros[id_foro], status=200)
