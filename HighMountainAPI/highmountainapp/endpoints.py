@@ -4,7 +4,7 @@ import bcrypt
 from django.http import JsonResponse
 import json
 
-from HighMountainAPI.highmountainapp.models import CustomUser, UserSession
+from HighMountainAPI.highmountainapp.models import CustomUser, UserSession, Foro, Comment
 
 
 def login_user(request):
@@ -28,3 +28,40 @@ def login_user(request):
         pass  # Contraseña incorrecta. En la siguiente tarea lo gestionamos
 
     return JsonResponse({'message': 'User logged in successfully'})
+
+def post_foro(request,foro_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'HTTP method unsupported'}, status=405)
+    token = request.headers.get('Authorization')
+
+    if not token:
+        return JsonResponse({'error': 'Token inválido'}, status=401)
+
+    try:
+        session = UserSession.objects.get(token=token)
+    except UserSession.DoesNotExist:
+        return JsonResponse({'error': 'Token inválido'}, status=401)
+
+    try:
+        body_json = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Comentario vacío'}, status=400)
+
+    comment = body_json.get('comment')
+
+    if not comment:
+        return JsonResponse({'error': 'Comentario vacío'}, status=400)
+
+    try:
+        foro = Foro.objects.get(id=foro_id)
+    except Foro.DoesNotExist:
+        return JsonResponse({'error': 'Comentario vacío'}, status=400)
+
+    # 4. Crear comentario
+    Comment.objects.create(
+        message=comment,
+        user=session.user,
+        foro=foro
+    )
+
+    return JsonResponse({'message': 'Comentario añadido'}, status=201)
