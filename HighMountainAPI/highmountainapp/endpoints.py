@@ -5,6 +5,7 @@ from django.http import JsonResponse
 import json
 
 from highmountainapp.models import CustomUser, UserSession
+from highmountainapp.models import Score
 
 
 def login_user(request):
@@ -28,3 +29,25 @@ def login_user(request):
         pass  # Contraseña incorrecta. En la siguiente tarea lo gestionamos
 
     return JsonResponse({'message': 'User logged in successfully'})
+
+def score_view(request):
+    if request.method == 'GET':
+        scores = Score.objects.all().order_by('-points')[:10]
+        score_list = [{"player": s.player_name, "points": s.points} for s in scores]
+        return JsonResponse({"scores": score_list}, status=200)
+
+    elif request.method == 'POST':
+        try:
+            body_json = json.loads(request.body)
+            player_name = body_json['player']
+            points = body_json['points']
+            if not player_name or not isinstance(points, int):
+                return JsonResponse({"error": "Missing fields"}, status=400)
+        except (KeyError, json.JSONDecodeError):
+            return JsonResponse({"error": "Missing fields"}, status=400)
+        score = Score(player_name=player_name, points=points)
+        score.save()
+        return JsonResponse({"message": "Score saved"}, status=201)
+
+    else:
+        return JsonResponse({"error": "HTTP method unsupported"}, status=405)
