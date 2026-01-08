@@ -43,3 +43,4 @@ def foros(request):
         return JsonResponse({}, status=200)
     else:
         return JsonResponse({'error': 'HTTP method unsupported'}, status=405)
+
