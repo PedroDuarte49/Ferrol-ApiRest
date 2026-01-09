@@ -13,7 +13,8 @@ class Score(models.Model):
     points = models.IntegerField()
 
 class Foro(models.Model):
-    title = models.CharField(max_length=15)
+    titulo = models.CharField(max_length=15)
+    contenido = models.TextField()
 
 
 class Comment(models.Model):

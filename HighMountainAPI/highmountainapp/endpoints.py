@@ -6,6 +6,8 @@ import json
 
 from HighMountainAPI.highmountainapp.models import CustomUser, UserSession
 
+from .models import Foro
+
 
 def login_user(request):
     if request.method != 'POST':
@@ -28,3 +30,18 @@ def login_user(request):
         pass  # Contraseña incorrecta. En la siguiente tarea lo gestionamos
 
     return JsonResponse({'message': 'User logged in successfully'})
+
+def foros(request):
+    if request.method == 'GET':
+        foros = Foro.objects.all()
+        data = []
+        for foro in foros:
+            data.append({
+                "id": foro.id,
+                "titulo": foro.titulo,
+                "contenido": foro.contenido
+            })
+        return JsonResponse({"foros": data}, status=200)
+    else:
+        return JsonResponse({'error': 'HTTP method unsupported'}, status=405)
+
