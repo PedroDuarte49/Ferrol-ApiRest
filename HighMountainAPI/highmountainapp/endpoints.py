@@ -6,7 +6,7 @@ import json
 
 from highmountainapp.models import CustomUser, UserSession
 
-from HighMountainAPI.highmountainapp.models import Foro
+from .models import Foro
 
 
 def login_user(request):
@@ -38,9 +38,10 @@ def foros(request):
         for foro in foros:
             data.append({
                 "id": foro.id,
-                "title": foro.title
+                "titulo": foro.titulo,
+                "contenido": foro.contenido
             })
-        return JsonResponse({}, status=200)
+        return JsonResponse({"foros": data}, status=200)
     else:
         return JsonResponse({'error': 'HTTP method unsupported'}, status=405)
 
