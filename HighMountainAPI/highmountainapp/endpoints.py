@@ -17,7 +17,7 @@ def login_user(request):
     try:
         db_user = CustomUser.objects.get(email=json_username)
     except CustomUser.DoesNotExist:
-        pass  # No existe el usuario. En la siguiente tarea lo gestionamos
+        pass
 
     if bcrypt.checkpw(json_password.encode('utf8'), db_user.encrypted_password.encode('utf8')):
         random_token = secrets.token_hex(10)
@@ -26,13 +26,13 @@ def login_user(request):
         return JsonResponse({"token": random_token}, status=201)
 
     else:
-        pass  # Contraseña incorrecta. En la siguiente tarea lo gestionamos
+        pass
 
     return JsonResponse({'message': 'User logged in successfully'})
 
 def score_view(request):
     if request.method == 'GET':
-        scores = Score.objects.all().order_by('-points')[:10]
+        scores = Score.objects.all().order_by('-points')
         score_list = [{"player": s.player_name, "points": s.points} for s in scores]
         return JsonResponse({"scores": score_list}, status=200)
 
