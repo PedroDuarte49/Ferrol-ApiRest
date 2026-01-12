@@ -16,7 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from highmountainapp import endpoints
+
+from highmountainapp import  endpoints
 
 urlpatterns = [
     path('admin', admin.site.urls),

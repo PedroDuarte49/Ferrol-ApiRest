@@ -4,9 +4,7 @@ import bcrypt
 from django.http import JsonResponse
 import json
 
-from highmountainapp.models import CustomUser, UserSession
-
-from .models import Foro
+from .models import Foro,CustomUser, UserSession
 
 
 def login_user(request):
