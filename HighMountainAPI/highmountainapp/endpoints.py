@@ -4,7 +4,7 @@ import bcrypt
 from django.http import JsonResponse
 import json
 
-from HighMountainAPI.highmountainapp.models import CustomUser, UserSession, Foro, Comment
+from .models import CustomUser, UserSession, Foro, Comment
 
 
 def login_user(request):
@@ -47,7 +47,7 @@ def post_foro(request,foro_id):
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Comentario vacío'}, status=400)
 
-    comment = body_json.get('comment')
+    comment = body_json.get('comentario')
 
     if not comment:
         return JsonResponse({'error': 'Comentario vacío'}, status=400)
@@ -55,7 +55,7 @@ def post_foro(request,foro_id):
     try:
         foro = Foro.objects.get(id=foro_id)
     except Foro.DoesNotExist:
-        return JsonResponse({'error': 'Comentario vacío'}, status=400)
+        return JsonResponse({'error': 'Ese foro no existe'}, status=404)
 
     # 4. Crear comentario
     Comment.objects.create(
