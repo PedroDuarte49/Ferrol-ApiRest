@@ -45,9 +45,27 @@ def get_foroId(request, id_foro):
     except UserSession.DoesNotExist:
         return JsonResponse({'error': 'Token inválido'}, status=401)
 
-    # Foro no encontrado
-    if id_foro not in foros:
+    # Obtener foro
+    try:
+        foro = Foro.objects.get(id=id_foro)
+    except Foro.DoesNotExist:
         return JsonResponse({'error': 'Foro no encontrado'}, status=404)
+
+    # Obtener comentarios asociados
+    comentarios = Comentario.objects.filter(foro=foro)
+
+    # Construir respuesta
+    data = {
+        "desc": foro.descripcion,
+        "comentarios": [
+            {
+                "username": c.usuario.username,
+                "comentario": c.texto,
+                "datetime": c.fecha.isoformat()
+            }
+            for c in comentarios
+        ]
+    }
 
     # Respuesta OK
     return JsonResponse(foros[id_foro], status=200)

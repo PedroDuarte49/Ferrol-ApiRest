@@ -17,9 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from highmountainapp import endpoints
+from highmountainapp.endpoints import get_foroId
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/login/', endpoints.login_user),
-    path('/foros/<string:id_foro>', get_foroId),
+    path('foros/<int:id_foro>', get_foroId),
 ]
