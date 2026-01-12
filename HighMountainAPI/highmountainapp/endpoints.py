@@ -5,6 +5,7 @@ from django.http import JsonResponse
 import json
 
 from django.views.decorators.csrf import csrf_exempt
+from .models import Foro,CustomUser, UserSession
 
 from .models import CustomUser, UserSession
 
@@ -50,3 +51,41 @@ def register_user(request):
         new_user = CustomUser(username=json_username, encrypted_password=encrypted_password.decode('utf8'))
         new_user.save()
         return JsonResponse({"message": "User created successfully"}, status=200)
+    return JsonResponse({'message': 'User logged in successfully'})
+
+def foros(request):
+    if request.method == 'GET':
+        foros = Foro.objects.all()
+        data = []
+        for foro in foros:
+            data.append({
+                "id": foro.id,
+                "titulo": foro.titulo,
+                "contenido": foro.contenido
+            })
+        return JsonResponse({"foros": data}, status=200)
+    elif request.method == 'POST':
+        # Crear un nuevo foro
+        try:
+            body_json = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'JSON inválido'}, status=400)
+
+        titulo = body_json.get('titulo')
+        contenido = body_json.get('contenido')
+
+        if not titulo or not contenido:
+            return JsonResponse({'error': 'Se requiere título y contenido'}, status=400)
+
+        nuevo_foro = Foro.objects.create(titulo=titulo, contenido=contenido)
+
+        return JsonResponse({
+            "id": nuevo_foro.id,
+            "titulo": nuevo_foro.titulo,
+            "contenido": nuevo_foro.contenido
+        }, status=201)
+
+    else:
+        return JsonResponse({'error': 'HTTP method unsupported'}, status=405)
+
+
