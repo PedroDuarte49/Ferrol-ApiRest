@@ -4,20 +4,22 @@ import bcrypt
 from django.http import JsonResponse
 import json
 
-from highmountainapp.models import CustomUser, UserSession
+from django.views.decorators.csrf import csrf_exempt
 
+from .models import CustomUser, UserSession
 
+@csrf_exempt
 def login_user(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'HTTP method unsupported'}, status=405)
     body_json = json.loads(request.body)
-    required_fields = ['user_email', 'user_password']
+    required_fields = ['username', 'password']
     if not all(field in body_json for field in required_fields):
         return JsonResponse({'error': 'Missing parameter'}, status=400)
-    json_username = body_json['user_username']
-    json_password = body_json['user_password']
+    json_username = body_json['username']
+    json_password = body_json['password']
     try:
-        db_user = CustomUser.objects.get(email=json_username)
+        db_user = CustomUser.objects.get(username=json_username)
     except CustomUser.DoesNotExist:
         return JsonResponse({"error": "User not in our system"}, status=404)
 
@@ -30,17 +32,18 @@ def login_user(request):
     else:
         return JsonResponse({"error": "Invalid password"}, status=401)
 
+@csrf_exempt
 def register_user(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'HTTP method unsupported'}, status=405)
     body_json = json.loads(request.body)
-    required_fields = ['user_email', 'user_password']
+    required_fields = ['username', 'password']
     if not all(field in body_json for field in required_fields):
         return JsonResponse({'error': 'Missing parameter'}, status=400)
-    json_username = body_json['user_username']
-    json_password = body_json['user_password']
+    json_username = body_json['username']
+    json_password = body_json['password']
     try:
-        CustomUser.objects.get(email=json_username)
+        CustomUser.objects.get(username=json_username)
         return JsonResponse({"error": "User already exists"}, status=409)
     except CustomUser.DoesNotExist:
         encrypted_password = bcrypt.hashpw(json_password.encode('utf8'), bcrypt.gensalt())

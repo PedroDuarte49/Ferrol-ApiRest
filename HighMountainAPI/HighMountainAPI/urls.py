@@ -20,7 +20,7 @@ from highmountainapp import endpoints
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/login/', endpoints.login_user),
-    path('auth/register/', endpoints.register_user),
+    path('auth/login', endpoints.login_user),
+    path('auth/register', endpoints.register_user),
 
 ]
