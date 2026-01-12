@@ -53,6 +53,46 @@ def register_user(request):
         return JsonResponse({"message": "User created successfully"}, status=200)
     return JsonResponse({'message': 'User logged in successfully'})
 
+def get_foroId(request, id_foro):
+    # Comprobar method
+    if request.method != 'GET':
+        return JsonResponse({'error': 'HTTP method unsupported'}, status=405)
+
+    # Leer token del header TOKEN INNECESARIO SOLO USAMOS EL TOKEN PARA COMENTAR EN /FOROS/ID el resto no necesitan autenticacio nes una app abierta
+    #token = request.headers.get('Authorization')
+    #if not token:
+        #return JsonResponse({'error': 'Token inválido'}, status=401)
+
+    # Comprobar si el token existe en BD
+    #try:
+        #UserSession.objects.get(token=token)
+    #except UserSession.DoesNotExist:
+        #return JsonResponse({'error': 'Token inválido'}, status=401)
+
+    # Obtener foro
+    try:
+        foro = Foro.objects.get(id=id_foro)
+    except Foro.DoesNotExist:
+        return JsonResponse({'error': 'Foro no encontrado'}, status=404)
+
+    # Obtener comentarios asociados
+    comentarios = Comentario.objects.filter(foro=foro)
+
+    # Construir respuesta
+    data = {
+        "desc": foro.descripcion,
+        "comentarios": [
+            {
+                "username": c.usuario.username,
+                "comentario": c.texto,
+                "datetime": c.fecha.isoformat()
+            }
+            for c in comentarios
+        ]
+    }
+
+    # Respuesta OK
+    return JsonResponse(foros[id_foro], status=200)
 def foros(request):
     if request.method == 'GET':
         foros = Foro.objects.all()
