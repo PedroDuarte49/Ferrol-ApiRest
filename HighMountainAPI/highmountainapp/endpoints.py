@@ -40,6 +40,28 @@ def foros(request):
                 "contenido": foro.contenido
             })
         return JsonResponse({"foros": data}, status=200)
+    elif request.method == 'POST':
+        # Crear un nuevo foro
+        try:
+            body_json = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'JSON inválido'}, status=400)
+
+        titulo = body_json.get('titulo')
+        contenido = body_json.get('contenido')
+
+        if not titulo or not contenido:
+            return JsonResponse({'error': 'Se requiere título y contenido'}, status=400)
+
+        nuevo_foro = Foro.objects.create(titulo=titulo, contenido=contenido)
+
+        return JsonResponse({
+            "id": nuevo_foro.id,
+            "titulo": nuevo_foro.titulo,
+            "contenido": nuevo_foro.contenido
+        }, status=201)
+
     else:
         return JsonResponse({'error': 'HTTP method unsupported'}, status=405)
+
 
