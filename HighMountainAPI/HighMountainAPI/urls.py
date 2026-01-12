@@ -16,10 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from HighMountainAPI.highmountainapp import endpoints
+
+from highmountainapp import  endpoints
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('auth/login/', endpoints.login_user),
+    path('admin', admin.site.urls),
+    path('auth/login', endpoints.login_user),
+    path('foros', endpoints.foros),
 
 ]
