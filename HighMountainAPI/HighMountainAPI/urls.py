@@ -19,8 +19,8 @@ from django.urls import path
 from highmountainapp import endpoints
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('auth/login/', endpoints.login_user),
-    path('foros/', endpoints.foros),
+    path('admin', admin.site.urls),
+    path('auth/login', endpoints.login_user),
+    path('foros', endpoints.foros),
 
 ]
