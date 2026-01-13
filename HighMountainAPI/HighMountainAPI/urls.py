@@ -16,15 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from highmountainapp import endpoints
+from highmountainapp import  endpoints
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('auth/login/', endpoints.login_user),
-<<<<<<< HEAD
-path('score/', endpoints.get_scoreboard, name='score_view'),
-
-=======
-path('score/', views.score_view, name='score_view')
->>>>>>> eb247844f23e031546e7412a05125c810f4a9315
+    path('admin', admin.site.urls),
+    path('auth/login', endpoints.login_user),
+    path('foros', endpoints.foros),
+    path('foros/<int:id_foro>', endpoints.get_foroId),
+    path('score', endpoints.get_scoreboard, name='score_view')
 ]
