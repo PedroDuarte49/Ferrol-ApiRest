@@ -5,7 +5,7 @@ from django.http import JsonResponse
 import json
 
 from .models import Foro,CustomUser, UserSession
-
+from django.views.decorators.csrf import csrf_exempt
 
 def login_user(request):
     if request.method != 'POST':
@@ -29,6 +29,7 @@ def login_user(request):
 
     return JsonResponse({'message': 'User logged in successfully'})
 
+@csrf_exempt
 def foros(request):
     if request.method == 'GET':
         foros = Foro.objects.all()
