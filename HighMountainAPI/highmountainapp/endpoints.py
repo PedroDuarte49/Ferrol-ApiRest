@@ -4,10 +4,9 @@ import bcrypt
 from django.http import JsonResponse
 import json
 
-from django.views.decorators.csrf import csrf_exempt
-from .models import Foro,CustomUser, UserSession
 
-from .models import CustomUser, UserSession
+from django.views.decorators.csrf import csrf_exempt
+from .models import Foro,CustomUser, UserSession, Score
 
 @csrf_exempt
 def login_user(request):
@@ -53,6 +52,27 @@ def register_user(request):
         return JsonResponse({"message": "User created successfully"}, status=200)
     return JsonResponse({'message': 'User logged in successfully'})
 
+def score_view(request):
+    if request.method == 'GET':
+        scores = Score.objects.all().order_by('-points')
+        score_list = [{"player": s.player_name, "points": s.points} for s in scores]
+        return JsonResponse({"scores": score_list}, status=200)
+
+    elif request.method == 'POST':
+        try:
+            body_json = json.loads(request.body)
+            player_name = body_json['player']
+            points = body_json['points']
+            if not player_name or not isinstance(points, int):
+                return JsonResponse({"error": "Missing fields"}, status=400)
+        except (KeyError, json.JSONDecodeError):
+            return JsonResponse({"error": "Missing fields"}, status=400)
+        score = Score(player_name=player_name, points=points)
+        score.save()
+        return JsonResponse({"message": "Score saved"}, status=201)
+
+    else:
+        return JsonResponse({"error": "HTTP method unsupported"}, status=405)
 def get_foroId(request, id_foro):
     # Comprobar method
     if request.method != 'GET':
