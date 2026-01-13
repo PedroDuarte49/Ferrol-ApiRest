@@ -22,5 +22,5 @@ urlpatterns = [
     path('admin', admin.site.urls),
     path('auth/login', endpoints.login_user),
     path('foros', endpoints.foros),
-    path('foros/<int:id_foro>', get_foroId),
+    path('foros/<int:id_foro>', endpoints.get_foroId),
 ]
