@@ -27,7 +27,7 @@ def login_user(request):
         return JsonResponse({"token": random_token}, status=201)
 
     else:
-        pass  # Contraseña incorrecta. En la siguiente tarea lo gestionamos
+        pass
 
     return JsonResponse({'message': 'User logged in successfully'})
 

@@ -21,6 +21,10 @@ from highmountainapp import endpoints
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/login/', endpoints.login_user),
+<<<<<<< HEAD
 path('score/', endpoints.get_scoreboard, name='score_view'),
 
+=======
+path('score/', views.score_view, name='score_view')
+>>>>>>> eb247844f23e031546e7412a05125c810f4a9315
 ]
