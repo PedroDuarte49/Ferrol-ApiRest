@@ -4,7 +4,6 @@ import bcrypt
 from django.http import JsonResponse
 import json
 
-
 from django.views.decorators.csrf import csrf_exempt
 from .models import Foro,CustomUser, UserSession, Score
 
@@ -113,6 +112,8 @@ def get_foroId(request, id_foro):
 
     # Respuesta OK
     return JsonResponse(foros[id_foro], status=200)
+
+@csrf_exempt
 def foros(request):
     if request.method == 'GET':
         foros = Foro.objects.all()
