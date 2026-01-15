@@ -4,8 +4,10 @@ import bcrypt
 from django.http import JsonResponse
 import json
 
+from django.template.defaulttags import comment
 from django.views.decorators.csrf import csrf_exempt
-from .models import Foro,CustomUser, UserSession, Score
+from .models import Foro, CustomUser, UserSession, Score, Comment
+
 
 @csrf_exempt
 def login_user(request):
@@ -51,40 +53,97 @@ def register_user(request):
         return JsonResponse({"message": "User created successfully"}, status=200)
     return JsonResponse({'message': 'User logged in successfully'})
 
-
-@csrf_exempt
-def get_scoreboard(request):  # Cambiamos el nombre para que coincida con tu urls.py
+def scoreboard(request):
     if request.method == 'GET':
-        # 1. Cambiado s.player_name por s.player
         scores = Score.objects.all().order_by('-points')
-        score_list = [{"player": s.player, "points": s.points} for s in scores]
+        score_list = [{"player": s.player_name, "points": s.points} for s in scores]
         return JsonResponse({"scores": score_list}, status=200)
 
     elif request.method == 'POST':
         try:
             body_json = json.loads(request.body)
-            # 2. Extraemos 'player' del JSON que viene de Android
-            player_val = body_json.get('player')
-            points_val = body_json.get('points')
-
-            if not player_val or not isinstance(points_val, int):
-                return JsonResponse({"error": "Missing fields or invalid points"}, status=400)
-
-            # 3. Guardamos usando el nombre de campo correcto: player
-            score = Score(player=player_val, points=points_val)
-            score.save()
-            return JsonResponse({"message": "Score saved"}, status=201)
-
-        except (json.JSONDecodeError, KeyError):
-            return JsonResponse({"error": "Invalid JSON or missing fields"}, status=400)
+            player_name = body_json['player']
+            points = body_json['points']
+            if not player_name or not isinstance(points, int):
+                return JsonResponse({"error": "Missing fields"}, status=400)
+        except (KeyError, json.JSONDecodeError):
+            return JsonResponse({"error": "Missing fields"}, status=400)
+        score = Score(player_name=player_name, points=points)
+        score.save()
+        return JsonResponse({"message": "Score saved"}, status=201)
 
     else:
         return JsonResponse({"error": "HTTP method unsupported"}, status=405)
-
-def get_foroId(request, id_foro):
+@csrf_exempt
+def comentarios(request, id_foro):
     # Comprobar method
-    if request.method != 'GET':
-        return JsonResponse({'error': 'HTTP method unsupported'}, status=405)
+    if request.method == 'POST':
+        # Leer token del header
+        token = request.headers.get('Authorization')
+        if not token:
+            return JsonResponse({'error': 'Token requerido'}, status=401)
+
+        # Validar token
+        try:
+            session = UserSession.objects.get(token=token)
+            usuario = session.user
+        except UserSession.DoesNotExist:
+            return JsonResponse({'error': 'Token inválido'}, status=401)
+
+        # Obtener foro
+        try:
+            foro = Foro.objects.get(id=id_foro)
+        except Foro.DoesNotExist:
+            return JsonResponse({'error': 'Foro no encontrado'}, status=404)
+
+        # Leer body
+        try:
+            body_json = json.loads(request.body)
+            texto = body_json.get('comentario')
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'JSON inválido'}, status=400)
+
+        if not texto:
+            return JsonResponse({'error': 'El comentario no puede estar vacío'}, status=400)
+
+        # Crear comentario
+        comentario = Comment.objects.create(
+            foro=foro,
+            user=usuario,
+            message=texto
+        )
+
+        return JsonResponse({
+            "message": "Comentario creado",
+            "username": comentario.user.username,
+            "comentario": comentario.message,
+            "datetime": comentario.datetime,
+        }, status=201)
+
+    elif request.method == 'GET':
+        try:
+            foro = Foro.objects.get(id=id_foro)
+        except Foro.DoesNotExist:
+            return JsonResponse({'error': 'Foro no encontrado'}, status=404)
+
+            # Obtener comentarios asociados
+        comentarios = Comment.objects.filter(foro=foro)
+
+        # Construir respuesta
+        data = {
+            "desc": foro.descripcion,
+            "comentarios": [
+                {
+                    "username": Comment.user.username,
+                    "comentario": Comment.message,
+                    "datetime": Comment.datetime,
+                }
+                for c in comentarios
+            ]
+        }
+
+        # Respuesta OK
+        return JsonResponse(foros[id_foro], status=200)
 
     # Leer token del header TOKEN INNECESARIO SOLO USAMOS EL TOKEN PARA COMENTAR EN /FOROS/ID el resto no necesitan autenticacio nes una app abierta
     #token = request.headers.get('Authorization')
@@ -98,29 +157,7 @@ def get_foroId(request, id_foro):
         #return JsonResponse({'error': 'Token inválido'}, status=401)
 
     # Obtener foro
-    try:
-        foro = Foro.objects.get(id=id_foro)
-    except Foro.DoesNotExist:
-        return JsonResponse({'error': 'Foro no encontrado'}, status=404)
 
-    # Obtener comentarios asociados
-    comentarios = Comentario.objects.filter(foro=foro)
-
-    # Construir respuesta
-    data = {
-        "desc": foro.descripcion,
-        "comentarios": [
-            {
-                "username": c.usuario.username,
-                "comentario": c.texto,
-                "datetime": c.fecha.isoformat()
-            }
-            for c in comentarios
-        ]
-    }
-
-    # Respuesta OK
-    return JsonResponse(foros[id_foro], status=200)
 
 @csrf_exempt
 def foros(request):

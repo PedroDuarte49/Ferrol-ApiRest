@@ -21,7 +21,8 @@ from highmountainapp import  endpoints
 urlpatterns = [
     path('admin', admin.site.urls),
     path('auth/login', endpoints.login_user),
+    path('auth/register', endpoints.register_user),
     path('foros', endpoints.foros),
-    path('foros/<int:id_foro>', endpoints.get_foroId),
-    path('score', endpoints.get_scoreboard, name='score_view')
+    path('foros/<int:id_foro>', endpoints.comentarios),
+    path('score', endpoints.scoreboard)
 ]
