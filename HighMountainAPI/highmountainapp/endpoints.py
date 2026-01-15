@@ -51,27 +51,36 @@ def register_user(request):
         return JsonResponse({"message": "User created successfully"}, status=200)
     return JsonResponse({'message': 'User logged in successfully'})
 
-def score_view(request):
+
+@csrf_exempt
+def get_scoreboard(request):  # Cambiamos el nombre para que coincida con tu urls.py
     if request.method == 'GET':
+        # 1. Cambiado s.player_name por s.player
         scores = Score.objects.all().order_by('-points')
-        score_list = [{"player": s.player_name, "points": s.points} for s in scores]
+        score_list = [{"player": s.player, "points": s.points} for s in scores]
         return JsonResponse({"scores": score_list}, status=200)
 
     elif request.method == 'POST':
         try:
             body_json = json.loads(request.body)
-            player_name = body_json['player']
-            points = body_json['points']
-            if not player_name or not isinstance(points, int):
-                return JsonResponse({"error": "Missing fields"}, status=400)
-        except (KeyError, json.JSONDecodeError):
-            return JsonResponse({"error": "Missing fields"}, status=400)
-        score = Score(player_name=player_name, points=points)
-        score.save()
-        return JsonResponse({"message": "Score saved"}, status=201)
+            # 2. Extraemos 'player' del JSON que viene de Android
+            player_val = body_json.get('player')
+            points_val = body_json.get('points')
+
+            if not player_val or not isinstance(points_val, int):
+                return JsonResponse({"error": "Missing fields or invalid points"}, status=400)
+
+            # 3. Guardamos usando el nombre de campo correcto: player
+            score = Score(player=player_val, points=points_val)
+            score.save()
+            return JsonResponse({"message": "Score saved"}, status=201)
+
+        except (json.JSONDecodeError, KeyError):
+            return JsonResponse({"error": "Invalid JSON or missing fields"}, status=400)
 
     else:
         return JsonResponse({"error": "HTTP method unsupported"}, status=405)
+
 def get_foroId(request, id_foro):
     # Comprobar method
     if request.method != 'GET':
