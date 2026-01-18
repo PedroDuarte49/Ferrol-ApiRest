@@ -53,10 +53,11 @@ def register_user(request):
         return JsonResponse({"message": "User created successfully"}, status=200)
     return JsonResponse({'message': 'User logged in successfully'})
 
+@csrf_exempt
 def scoreboard(request):
     if request.method == 'GET':
         scores = Score.objects.all().order_by('-points')
-        score_list = [{"player": s.player_name, "points": s.points} for s in scores]
+        score_list = [{"player": s.player, "points": s.points} for s in scores]
         return JsonResponse({"scores": score_list}, status=200)
 
     elif request.method == 'POST':
@@ -127,23 +128,27 @@ def comentarios(request, id_foro):
             return JsonResponse({'error': 'Foro no encontrado'}, status=404)
 
             # Obtener comentarios asociados
-        comentarios = Comment.objects.filter(foro=foro)
+        comentarios = Comment.objects.filter(foro=foro).order_by('datetime')
 
         # Construir respuesta
-        data = {
-            "desc": foro.descripcion,
+        data =  {
+            "foro": {
+                "id": foro.id,
+                "titulo": foro.titulo,
+                "contenido": foro.contenido
+            },
             "comentarios": [
                 {
-                    "username": Comment.user.username,
-                    "comentario": Comment.message,
-                    "datetime": Comment.datetime,
+                    "username": c.user.username,
+                    "comentario": c.message,
+                    "datetime": c.datetime,
                 }
                 for c in comentarios
             ]
         }
 
         # Respuesta OK
-        return JsonResponse(foros[id_foro], status=200)
+        return JsonResponse(data, status=200)
 
     # Leer token del header TOKEN INNECESARIO SOLO USAMOS EL TOKEN PARA COMENTAR EN /FOROS/ID el resto no necesitan autenticacio nes una app abierta
     #token = request.headers.get('Authorization')
