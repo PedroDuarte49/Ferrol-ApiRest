@@ -63,13 +63,13 @@ def scoreboard(request):
     elif request.method == 'POST':
         try:
             body_json = json.loads(request.body)
-            player_name = body_json['player']
+            player = body_json['player']
             points = body_json['points']
-            if not player_name or not isinstance(points, int):
+            if not player or not isinstance(points, int):
                 return JsonResponse({"error": "Missing fields"}, status=400)
         except (KeyError, json.JSONDecodeError):
             return JsonResponse({"error": "Missing fields"}, status=400)
-        score = Score(player_name=player_name, points=points)
+        score = Score(player=player, points=points)
         score.save()
         return JsonResponse({"message": "Score saved"}, status=201)
 
