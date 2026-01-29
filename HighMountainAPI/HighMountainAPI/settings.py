@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost','192.168.1.58','10.0.2.2']
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0']
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '10.0.2.2']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '10.0.2.2','breixo.pythonanywhere.com']
 
 
 # Application definition
