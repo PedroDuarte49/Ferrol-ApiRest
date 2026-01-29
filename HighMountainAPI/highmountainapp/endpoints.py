@@ -141,7 +141,7 @@ def comentarios(request, id_foro):
                 {
                     "username": c.user.username,
                     "comentario": c.message,
-                    "datetime": c.datetime,
+                    "datetime": c.datetime.isoformat(),
                 }
                 for c in comentarios
             ]
